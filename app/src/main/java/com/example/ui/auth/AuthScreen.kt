@@ -84,6 +84,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+private const val FALLBACK_WEB_CLIENT_ID =
+    "1080111455648-leuh5pn4od6ogmgq0l5ggk3e44orrefr.apps.googleusercontent.com"
+
+private fun resolveWebClientId(context: Context): String {
+    val resId = context.resources.getIdentifier(
+        "default_web_client_id",
+        "string",
+        context.packageName
+    )
+    return if (resId != 0) {
+        runCatching { context.getString(resId) }.getOrNull()?.takeIf { it.isNotBlank() }
+            ?: FALLBACK_WEB_CLIENT_ID
+    } else {
+        FALLBACK_WEB_CLIENT_ID
+    }
+}
+
 tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
@@ -98,9 +115,8 @@ fun onGoogleSignInClicked(
     onAuthError: (String) -> Unit,
     scope: CoroutineScope
 ) {
-    val clientId = try {
-        context.getString(R.string.default_web_client_id)
-    } catch (e: Exception) {
+    val clientId = resolveWebClientId(context)
+    if (clientId.isBlank()) {
         onAuthFallbackToLocalCampus("Estudiante FESC")
         return
     }
