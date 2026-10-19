@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Neural connection edges -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:pathData="M34,64 L54,48 L74,64 M54,48 L54,74 M34,64 L54,74 L74,64" />
+    <!-- Academic Mortarboard Cap Top (Filled Silhouette) -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M54,26 L80,38 L54,50 L28,38 Z" />
+    <!-- Cap Base -->
+    <path
+        android:fillColor="#8B5CF6"
+        android:pathData="M38,44 L38,54 C38,58 45,62 54,62 C63,62 70,58 70,54 L70,44 L54,51.5 Z" />
+    <!-- Glowing Synapse Nodes -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M34,64m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M74,64m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0" />
+    <path
+        android:fillColor="#FF3366"
+        android:pathData="M54,75m-6.5,0a6.5,6.5 0,1 1,13 0a6.5,6.5 0,1 1,-13 0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,38m-3.5,0a3.5,3.5 0,1 1,7 0a3.5,3.5 0,1 1,-7 0" />
+</vector>

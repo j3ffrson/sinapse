@@ -1,0 +1,312 @@
+{
+  "entities": {
+    "StudentProfile": {
+      "title": "StudentProfile",
+      "description": "Academic profile and real-time campus status of a FESC student.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated Firebase UID of the student."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Student full name or alias."
+        },
+        "program": {
+          "type": "string",
+          "description": "University academic program at FESC."
+        },
+        "semester": {
+          "type": "integer",
+          "description": "Current academic semester (1 to 12)."
+        },
+        "currentZone": {
+          "type": "string",
+          "description": "Current campus zone ID where the student is located."
+        },
+        "statusMode": {
+          "type": "string",
+          "description": "Current collaborative status mode."
+        },
+        "enrolledSubjects": {
+          "type": "array",
+          "description": "List of active subjects enrolled by the student (max 10)."
+        },
+        "helpedPeersCount": {
+          "type": "integer",
+          "description": "Number of classmates helped in study sessions or SOS alerts."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the profile was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the profile was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "program",
+        "semester",
+        "currentZone",
+        "statusMode",
+        "enrolledSubjects",
+        "helpedPeersCount",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StudyTable": {
+      "title": "StudyTable",
+      "description": "Open collaborative study table on campus with live seat tracking.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner UID scoping the campus session."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Academic subject being studied at the table."
+        },
+        "topic": {
+          "type": "string",
+          "description": "Specific exam topic or workshop being reviewed."
+        },
+        "campusZone": {
+          "type": "string",
+          "description": "Campus zone identifier (e.g. LIBRARY, CUBICLES, LABS, PLAZA, CAFETERIA)."
+        },
+        "spotReference": {
+          "type": "string",
+          "description": "Physical table or landmark reference inside the zone."
+        },
+        "studyVibe": {
+          "type": "string",
+          "description": "Study dynamic or methodology of the table."
+        },
+        "hostName": {
+          "type": "string",
+          "description": "Display name of the student hosting the table."
+        },
+        "hostProgram": {
+          "type": "string",
+          "description": "Academic program of the host student."
+        },
+        "maxSeats": {
+          "type": "integer",
+          "description": "Maximum capacity of the study table (2 to 12)."
+        },
+        "occupiedSeats": {
+          "type": "integer",
+          "description": "Current number of occupied seats (1 to maxSeats)."
+        },
+        "participantNames": {
+          "type": "array",
+          "description": "Names of students currently seated at the table."
+        },
+        "isJoinedByCurrentUser": {
+          "type": "boolean",
+          "description": "Whether the authenticated student has reserved a seat at this table."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether the study table session is currently open."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "subject",
+        "topic",
+        "campusZone",
+        "spotReference",
+        "studyVibe",
+        "hostName",
+        "hostProgram",
+        "maxSeats",
+        "occupiedSeats",
+        "participantNames",
+        "isJoinedByCurrentUser",
+        "isActive",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SosAlert": {
+      "title": "SosAlert",
+      "description": "Urgent pre-exam academic doubt alert broadcast on campus.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner UID scoping the campus SOS alert."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Subject of the urgent exam question."
+        },
+        "questionTitle": {
+          "type": "string",
+          "description": "Short summary of the urgent doubt."
+        },
+        "questionDetail": {
+          "type": "string",
+          "description": "Detailed explanation of the exercise or concept needed."
+        },
+        "examUrgency": {
+          "type": "string",
+          "description": "Urgency level before the midterm exam."
+        },
+        "campusZone": {
+          "type": "string",
+          "description": "Campus zone where the student is waiting for help."
+        },
+        "spotReference": {
+          "type": "string",
+          "description": "Exact location reference inside the zone."
+        },
+        "authorName": {
+          "type": "string",
+          "description": "Name of the student requesting help."
+        },
+        "authorProgram": {
+          "type": "string",
+          "description": "Academic program of the student."
+        },
+        "isResolved": {
+          "type": "boolean",
+          "description": "Whether the urgent doubt has been resolved."
+        },
+        "helperNames": {
+          "type": "array",
+          "description": "List of peer mentors who offered help."
+        },
+        "isCurrentUserHelping": {
+          "type": "boolean",
+          "description": "Whether the current student has joined as a helper/mentor."
+        },
+        "responsesCount": {
+          "type": "integer",
+          "description": "Number of explanations or replies posted."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "subject",
+        "questionTitle",
+        "questionDetail",
+        "examUrgency",
+        "campusZone",
+        "spotReference",
+        "authorName",
+        "authorProgram",
+        "isResolved",
+        "helperNames",
+        "isCurrentUserHelping",
+        "responsesCount",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CollaborationMessage": {
+      "title": "CollaborationMessage",
+      "description": "Real-time message or explanation posted inside a StudyTable or SosAlert thread.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner UID scoping the message."
+        },
+        "parentId": {
+          "type": "string",
+          "description": "ID of the StudyTable or SosAlert this message belongs to."
+        },
+        "parentType": {
+          "type": "string",
+          "enum": ["TABLE", "SOS"],
+          "description": "Whether the parent is a TABLE or SOS alert."
+        },
+        "senderName": {
+          "type": "string",
+          "description": "Display name of the message author."
+        },
+        "senderRole": {
+          "type": "string",
+          "description": "Academic program or mentor badge of the sender."
+        },
+        "content": {
+          "type": "string",
+          "description": "Message body or step-by-step explanation."
+        },
+        "isGoingInPerson": {
+          "type": "boolean",
+          "description": "Whether this message indicates the peer is walking over in person."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "parentId",
+        "parentType",
+        "senderName",
+        "senderRole",
+        "content",
+        "isGoingInPerson",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/StudentProfile" },
+      "description": "Student academic profile and active campus zone status."
+    },
+    "/study_tables/{tableId}": {
+      "schema": { "$ref": "#/entities/StudyTable" },
+      "description": "Open collaborative study tables across the FESC campus."
+    },
+    "/sos_alerts/{alertId}": {
+      "schema": { "$ref": "#/entities/SosAlert" },
+      "description": "Urgent pre-exam SOS academic doubts."
+    },
+    "/collaboration_messages/{messageId}": {
+      "schema": { "$ref": "#/entities/CollaborationMessage" },
+      "description": "Coordination messages and explanations for study tables and SOS alerts."
+    }
+  }
+}

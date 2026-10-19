@@ -1,0 +1,6 @@
+{
+  "name": "FESC Synapse",
+  "description": "Red colaborativa de estudio en tiempo real para el campus universitario con mapa interactivo, mesas abiertas y alertas SOS de parciales.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

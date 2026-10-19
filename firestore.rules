@@ -1,0 +1,226 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidStudentProfile(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+             data.program is string && data.program.size() >= 1 && data.program.size() <= 80 &&
+             data.semester is int && data.semester >= 1 && data.semester <= 12 &&
+             data.currentZone is string && data.currentZone.size() >= 1 && data.currentZone.size() <= 60 &&
+             data.statusMode is string && data.statusMode.size() >= 1 && data.statusMode.size() <= 60 &&
+             data.enrolledSubjects is list && data.enrolledSubjects.size() <= 10 &&
+             (data.enrolledSubjects.size() == 0 || data.enrolledSubjects[0] is string) &&
+             data.helpedPeersCount is int && data.helpedPeersCount >= 0 && data.helpedPeersCount <= 10000;
+    }
+
+    function isValidStudyTable(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.subject is string && data.subject.size() >= 1 && data.subject.size() <= 100 &&
+             data.topic is string && data.topic.size() >= 1 && data.topic.size() <= 200 &&
+             data.campusZone is string && data.campusZone.size() >= 1 && data.campusZone.size() <= 50 &&
+             data.spotReference is string && data.spotReference.size() >= 1 && data.spotReference.size() <= 120 &&
+             data.studyVibe is string && data.studyVibe.size() >= 1 && data.studyVibe.size() <= 60 &&
+             data.hostName is string && data.hostName.size() >= 1 && data.hostName.size() <= 80 &&
+             data.hostProgram is string && data.hostProgram.size() >= 1 && data.hostProgram.size() <= 80 &&
+             data.maxSeats is int && data.maxSeats >= 2 && data.maxSeats <= 12 &&
+             data.occupiedSeats is int && data.occupiedSeats >= 1 && data.occupiedSeats <= data.maxSeats &&
+             data.participantNames is list && data.participantNames.size() >= 1 && data.participantNames.size() <= 12 &&
+             data.participantNames[0] is string &&
+             data.isJoinedByCurrentUser is bool &&
+             data.isActive is bool;
+    }
+
+    function isValidSosAlert(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.subject is string && data.subject.size() >= 1 && data.subject.size() <= 100 &&
+             data.questionTitle is string && data.questionTitle.size() >= 1 && data.questionTitle.size() <= 140 &&
+             data.questionDetail is string && data.questionDetail.size() >= 1 && data.questionDetail.size() <= 500 &&
+             data.examUrgency is string && data.examUrgency.size() >= 1 && data.examUrgency.size() <= 60 &&
+             data.campusZone is string && data.campusZone.size() >= 1 && data.campusZone.size() <= 50 &&
+             data.spotReference is string && data.spotReference.size() >= 1 && data.spotReference.size() <= 120 &&
+             data.authorName is string && data.authorName.size() >= 1 && data.authorName.size() <= 80 &&
+             data.authorProgram is string && data.authorProgram.size() >= 1 && data.authorProgram.size() <= 80 &&
+             data.isResolved is bool &&
+             data.helperNames is list && data.helperNames.size() <= 10 &&
+             (data.helperNames.size() == 0 || data.helperNames[0] is string) &&
+             data.isCurrentUserHelping is bool &&
+             data.responsesCount is int && data.responsesCount >= 0 && data.responsesCount <= 1000;
+    }
+
+    function isValidCollaborationMessage(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.parentId is string && data.parentId.size() >= 1 && data.parentId.size() <= 128 &&
+             data.parentType is string && (data.parentType == 'TABLE' || data.parentType == 'SOS') &&
+             data.senderName is string && data.senderName.size() >= 1 && data.senderName.size() <= 80 &&
+             data.senderRole is string && data.senderRole.size() >= 1 && data.senderRole.size() <= 60 &&
+             data.content is string && data.content.size() >= 1 && data.content.size() <= 500 &&
+             data.isGoingInPerson is bool;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if isSignedIn() && request.auth.uid == userId;
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll([
+                         'userId', 'displayName', 'program', 'semester',
+                         'currentZone', 'statusMode', 'enrolledSubjects',
+                         'helpedPeersCount', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'displayName', 'program', 'semester',
+                         'currentZone', 'statusMode', 'enrolledSubjects',
+                         'helpedPeersCount', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       isValidStudentProfile(incoming());
+
+      allow update: if isValidStudentProfile(incoming()) &&
+                       isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'displayName', 'program', 'semester', 'currentZone',
+                         'statusMode', 'enrolledSubjects', 'helpedPeersCount', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+    }
+
+    match /study_tables/{tableId} {
+      allow get: if isSignedIn() && isValidId(tableId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(tableId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'subject', 'topic', 'campusZone', 'spotReference',
+                         'studyVibe', 'hostName', 'hostProgram', 'maxSeats', 'occupiedSeats',
+                         'participantNames', 'isJoinedByCurrentUser', 'isActive',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'subject', 'topic', 'campusZone', 'spotReference',
+                         'studyVibe', 'hostName', 'hostProgram', 'maxSeats', 'occupiedSeats',
+                         'participantNames', 'isJoinedByCurrentUser', 'isActive',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       isValidStudyTable(incoming());
+
+      allow update: if isValidStudyTable(incoming()) &&
+                       isSignedIn() &&
+                       isValidId(tableId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'subject', 'topic', 'campusZone', 'spotReference', 'studyVibe',
+                         'maxSeats', 'occupiedSeats', 'participantNames',
+                         'isJoinedByCurrentUser', 'isActive', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(tableId) && existing().userId == request.auth.uid;
+    }
+
+    match /sos_alerts/{alertId} {
+      allow get: if isSignedIn() && isValidId(alertId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(alertId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'subject', 'questionTitle', 'questionDetail',
+                         'examUrgency', 'campusZone', 'spotReference', 'authorName',
+                         'authorProgram', 'isResolved', 'helperNames',
+                         'isCurrentUserHelping', 'responsesCount', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'subject', 'questionTitle', 'questionDetail',
+                         'examUrgency', 'campusZone', 'spotReference', 'authorName',
+                         'authorProgram', 'isResolved', 'helperNames',
+                         'isCurrentUserHelping', 'responsesCount', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       isValidSosAlert(incoming());
+
+      allow update: if isValidSosAlert(incoming()) &&
+                       isSignedIn() &&
+                       isValidId(alertId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'questionTitle', 'questionDetail', 'examUrgency',
+                         'campusZone', 'spotReference', 'isResolved',
+                         'helperNames', 'isCurrentUserHelping', 'responsesCount', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(alertId) && existing().userId == request.auth.uid;
+    }
+
+    match /collaboration_messages/{messageId} {
+      allow get: if isSignedIn() && isValidId(messageId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(messageId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'parentId', 'parentType', 'senderName',
+                         'senderRole', 'content', 'isGoingInPerson',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'parentId', 'parentType', 'senderName',
+                         'senderRole', 'content', 'isGoingInPerson',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       isValidCollaborationMessage(incoming());
+
+      allow update: if isValidCollaborationMessage(incoming()) &&
+                       isSignedIn() &&
+                       isValidId(messageId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'content', 'isGoingInPerson', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(messageId) && existing().userId == request.auth.uid;
+    }
+  }
+}

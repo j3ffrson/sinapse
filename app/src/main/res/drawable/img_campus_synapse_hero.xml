@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="360dp"
+    android:height="180dp"
+    android:viewportWidth="360"
+    android:viewportHeight="180">
+    <path android:pathData="M0,0h360v180h-360z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="360"
+                android:endY="180"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#0A0E17" />
+                <item android:offset="0.5" android:color="#151F38" />
+                <item android:offset="1.0" android:color="#1F163E" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Subtle Campus Grid -->
+    <path
+        android:strokeColor="#1F00E5FF"
+        android:strokeWidth="1"
+        android:pathData="M0,45 L360,45 M0,90 L360,90 M0,135 L360,135 M60,0 L60,180 M120,0 L120,180 M180,0 L180,180 M240,0 L240,180 M300,0 L300,180" />
+    <!-- Neural Synapse Connections -->
+    <path
+        android:strokeColor="#6600E5FF"
+        android:strokeWidth="2.2"
+        android:pathData="M65,120 L135,65 L215,95 L295,55 M135,65 L175,140 L295,125 M215,95 L295,125" />
+    <path
+        android:strokeColor="#888B5CF6"
+        android:strokeWidth="1.8"
+        android:pathData="M65,120 L175,140 L215,95" />
+    <!-- Glowing Orbs -->
+    <path
+        android:fillColor="#2600E5FF"
+        android:pathData="M135,65m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M135,65m-7,0a7,7 0,1 1,14 0a7,7 0,1 1,-14 0" />
+    <path
+        android:fillColor="#26FF3366"
+        android:pathData="M215,95m-22,0a22,22 0,1 1,44 0a22,22 0,1 1,-44 0" />
+    <path
+        android:fillColor="#FF3366"
+        android:pathData="M215,95m-6.5,0a6.5,6.5 0,1 1,13 0a6.5,6.5 0,1 1,-13 0" />
+    <path
+        android:fillColor="#8B5CF6"
+        android:pathData="M295,55m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0" />
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M65,120m-5.5,0a5.5,5.5 0,1 1,11 0a5.5,5.5 0,1 1,-11 0" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M175,140m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+    <path
+        android:fillColor="#8B5CF6"
+        android:pathData="M295,125m-5.5,0a5.5,5.5 0,1 1,11 0a5.5,5.5 0,1 1,-11 0" />
+</vector>
