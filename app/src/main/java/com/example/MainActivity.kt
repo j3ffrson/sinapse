@@ -73,6 +73,7 @@ import com.example.data.model.StudyTable
 import com.example.data.model.UiState
 import com.example.data.repository.SynapseRepository
 import com.example.ui.auth.AuthScreen
+import com.example.ui.auth.safeFirebaseAuth
 import com.example.ui.auth.signOut
 import com.example.ui.components.CollaborationThreadDialog
 import com.example.ui.components.CreateStudyTableDialog
@@ -91,10 +92,9 @@ import com.example.ui.theme.SynapseObsidian
 import com.example.ui.theme.SynapseSurface
 import com.example.ui.theme.SynapseTextSecondary
 import com.example.ui.viewmodel.SynapseViewModel
-import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -103,6 +103,11 @@ import kotlinx.coroutines.flow.callbackFlow
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        runCatching {
+            if (FirebaseApp.getApps(this).isEmpty()) {
+                FirebaseApp.initializeApp(this)
+            }
+        }
         enableEdgeToEdge()
         setContent {
             FESCSynapseTheme {
@@ -112,18 +117,27 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-internal fun FirebaseAuth.authStateFlow(): Flow<FirebaseUser?> = callbackFlow {
+internal fun FirebaseAuth?.authStateFlow(): Flow<FirebaseUser?> = callbackFlow {
+    val authInstance = this@authStateFlow
+    if (authInstance == null) {
+        trySend(null)
+        awaitClose {}
+        return@callbackFlow
+    }
     val listener = FirebaseAuth.AuthStateListener { auth ->
         trySend(auth.currentUser)
     }
-    addAuthStateListener(listener)
-    awaitClose { removeAuthStateListener(listener) }
+    authInstance.addAuthStateListener(listener)
+    awaitClose { authInstance.removeAuthStateListener(listener) }
 }
 
 @Composable
-fun AppNavigation(auth: FirebaseAuth = Firebase.auth) {
-    val authFlowUser by auth.authStateFlow().collectAsStateWithLifecycle(initialValue = auth.currentUser)
-    var directFirebaseUser by remember { mutableStateOf(auth.currentUser) }
+fun AppNavigation(auth: FirebaseAuth? = null) {
+    val context = LocalContext.current
+    val resolvedAuth = remember(auth, context) { auth ?: safeFirebaseAuth(context) }
+    val authFlowUser by resolvedAuth.authStateFlow()
+        .collectAsStateWithLifecycle(initialValue = resolvedAuth?.currentUser)
+    var directFirebaseUser by remember { mutableStateOf(resolvedAuth?.currentUser) }
     var localCampusDisplayName by rememberSaveable { mutableStateOf<String?>(null) }
 
     val activeFirebaseUser = authFlowUser ?: directFirebaseUser
@@ -131,7 +145,7 @@ fun AppNavigation(auth: FirebaseAuth = Firebase.auth) {
     if (activeFirebaseUser == null && localCampusDisplayName == null) {
         AuthScreen(
             onAuthSuccess = {
-                directFirebaseUser = auth.currentUser
+                directFirebaseUser = resolvedAuth?.currentUser
                 if (directFirebaseUser == null) {
                     localCampusDisplayName = "Estudiante FESC"
                 }
@@ -154,12 +168,31 @@ fun AppNavigation(auth: FirebaseAuth = Firebase.auth) {
                     val app = checkNotNull(this[APPLICATION_KEY]) {
                         "APPLICATION_KEY missing from CreationExtras"
                     }
-                    val databaseId = app.getString(R.string.firestore_database_id)
-                    val db = FirebaseFirestore.getInstance(databaseId)
+                    val db = runCatching {
+                        if (FirebaseApp.getApps(app).isEmpty()) {
+                            FirebaseApp.initializeApp(app)
+                        }
+                        val resId = app.resources.getIdentifier(
+                            "firestore_database_id",
+                            "string",
+                            app.packageName
+                        )
+                        val databaseId = if (resId != 0) {
+                            app.getString(resId)
+                        } else {
+                            "ai-studio-android-fescsyna-e52cef2b-05e0-49d4-9d9b-3a5040aafcc1"
+                        }
+                        if (FirebaseApp.getApps(app).isNotEmpty()) {
+                            FirebaseFirestore.getInstance(databaseId)
+                        } else {
+                            null
+                        }
+                    }.getOrNull()
+
                     SynapseViewModel(
                         repository = SynapseRepository(
                             db = db,
-                            isLocalSession = isLocalMode,
+                            isLocalSession = isLocalMode || db == null,
                             localUserId = sessionKey
                         ),
                         currentUserId = sessionKey,

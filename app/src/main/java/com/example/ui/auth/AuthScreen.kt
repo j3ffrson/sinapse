@@ -77,15 +77,22 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.auth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 private const val FALLBACK_WEB_CLIENT_ID =
     "1080111455648-leuh5pn4od6ogmgq0l5ggk3e44orrefr.apps.googleusercontent.com"
+
+fun safeFirebaseAuth(context: Context? = null): FirebaseAuth? = runCatching {
+    if (context != null && FirebaseApp.getApps(context).isEmpty()) {
+        FirebaseApp.initializeApp(context)
+    }
+    FirebaseAuth.getInstance()
+}.getOrNull()
 
 private fun resolveWebClientId(context: Context): String {
     val resId = context.resources.getIdentifier(
@@ -148,12 +155,17 @@ fun onGoogleSignInClicked(
                 val googleIdToken = googleIdTokenCredential.idToken
                 val displayName = googleIdTokenCredential.displayName
                     ?: googleIdTokenCredential.id.substringBefore("@").ifBlank { "Estudiante FESC" }
-                try {
-                    val authCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
-                    Firebase.auth.signInWithCredential(authCredential).await()
-                    onAuthSuccess()
-                } catch (firebaseEx: Exception) {
-                    Log.w("Auth", "Firebase signInWithCredential failed, activating local campus session", firebaseEx)
+                val auth = safeFirebaseAuth(context)
+                if (auth != null) {
+                    try {
+                        val authCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
+                        auth.signInWithCredential(authCredential).await()
+                        onAuthSuccess()
+                    } catch (firebaseEx: Exception) {
+                        Log.w("Auth", "Firebase signInWithCredential failed, activating local campus session", firebaseEx)
+                        onAuthFallbackToLocalCampus(displayName)
+                    }
+                } else {
                     onAuthFallbackToLocalCampus(displayName)
                 }
             } else {
@@ -165,10 +177,6 @@ fun onGoogleSignInClicked(
                 "Google CredentialManager did not complete OAuth token exchange (${e.javaClass.simpleName}: ${e.message}). Entering local campus session.",
                 e
             )
-            // When debugging on a physical device via Android Studio, Google Play Services may throw
-            // GetCredentialCancellationException ([28444] Developer console / SHA-1 / OAuth test user restriction)
-            // right after selecting the Google account. Transition directly into the campus session so the
-            // user is never stuck on the login screen.
             onAuthFallbackToLocalCampus("Estudiante FESC")
         }
     }
@@ -180,7 +188,7 @@ fun signOut(
     onSignOutComplete: () -> Unit,
     scope: CoroutineScope
 ) {
-    Firebase.auth.signOut()
+    safeFirebaseAuth(context)?.signOut()
     scope.launch {
         try {
             credentialManager.clearCredentialState(ClearCredentialStateRequest())
@@ -204,7 +212,7 @@ fun AuthScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        if (Firebase.auth.currentUser != null) {
+        if (safeFirebaseAuth(context)?.currentUser != null) {
             onAuthSuccess()
         }
     }

@@ -23,18 +23,28 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class SynapseRepository(
-    private val db: FirebaseFirestore,
+    private val db: FirebaseFirestore?,
     private val isLocalSession: Boolean = false,
     private val localUserId: String = "local_student_fesc"
 ) {
     constructor(context: Context) : this(
-        FirebaseFirestore.getInstance(
-            context.applicationContext.getString(R.string.firestore_database_id)
-        )
+        db = kotlin.runCatching {
+            val resId = context.resources.getIdentifier(
+                "firestore_database_id",
+                "string",
+                context.packageName
+            )
+            val dbId = if (resId != 0) context.getString(resId) else "(default)"
+            FirebaseFirestore.getInstance(dbId)
+        }.getOrNull(),
+        isLocalSession = false
     )
 
-    private val auth: FirebaseAuth
-        get() = FirebaseAuth.getInstance()
+    private val useLocalStore: Boolean
+        get() = isLocalSession || db == null
+
+    private val auth: FirebaseAuth?
+        get() = runCatching { FirebaseAuth.getInstance() }.getOrNull()
 
     private val localProfileFlow = MutableStateFlow<StudentProfile?>(null)
     private val localTablesFlow = MutableStateFlow<List<StudyTable>>(emptyList())
@@ -42,16 +52,17 @@ class SynapseRepository(
     private val localMessagesFlow = MutableStateFlow<List<CollaborationMessage>>(emptyList())
 
     private fun requireUserId(): String {
-        if (isLocalSession) return localUserId
-        return auth.currentUser?.uid
+        if (useLocalStore) return localUserId
+        return auth?.currentUser?.uid
             ?: throw IllegalStateException("Debes iniciar sesión con Google antes de usar FESC Synapse.")
     }
 
     fun observeStudentProfile(userId: String): Flow<StudentProfile?> {
-        if (isLocalSession) return localProfileFlow.asStateFlow()
+        val firestore = db
+        if (useLocalStore || firestore == null) return localProfileFlow.asStateFlow()
         return callbackFlow {
             val path = "users/$userId"
-            val registration = db.collection("users").document(userId)
+            val registration = firestore.collection("users").document(userId)
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
                         handleFirestoreError(error, OperationType.GET, path)
@@ -73,10 +84,11 @@ class SynapseRepository(
     }
 
     fun observeStudyTables(userId: String): Flow<List<StudyTable>> {
-        if (isLocalSession) return localTablesFlow.asStateFlow()
+        val firestore = db
+        if (useLocalStore || firestore == null) return localTablesFlow.asStateFlow()
         return callbackFlow {
             val path = "study_tables"
-            val registration = db.collection(path)
+            val registration = firestore.collection(path)
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
@@ -95,10 +107,11 @@ class SynapseRepository(
     }
 
     fun observeSosAlerts(userId: String): Flow<List<SosAlert>> {
-        if (isLocalSession) return localSosFlow.asStateFlow()
+        val firestore = db
+        if (useLocalStore || firestore == null) return localSosFlow.asStateFlow()
         return callbackFlow {
             val path = "sos_alerts"
-            val registration = db.collection(path)
+            val registration = firestore.collection(path)
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
@@ -120,10 +133,11 @@ class SynapseRepository(
     }
 
     fun observeMessages(userId: String): Flow<List<CollaborationMessage>> {
-        if (isLocalSession) return localMessagesFlow.asStateFlow()
+        val firestore = db
+        if (useLocalStore || firestore == null) return localMessagesFlow.asStateFlow()
         return callbackFlow {
             val path = "collaboration_messages"
-            val registration = db.collection(path)
+            val registration = firestore.collection(path)
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
@@ -142,12 +156,13 @@ class SynapseRepository(
     }
 
     suspend fun getStudyTableById(tableId: String): Result<StudyTable?> = runCatching {
-        if (isLocalSession) {
+        val firestore = db
+        if (useLocalStore || firestore == null) {
             return@runCatching localTablesFlow.value.find { it.id == tableId }
         }
         val path = "study_tables/$tableId"
         try {
-            val doc = db.collection("study_tables").document(tableId).get().await()
+            val doc = firestore.collection("study_tables").document(tableId).get().await()
             doc.toObject(StudyTable::class.java, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE)
         } catch (e: CancellationException) {
             throw e
@@ -175,7 +190,8 @@ class SynapseRepository(
         val safeSubjects = enrolledSubjects.map { it.trim().take(80) }.filter { it.isNotEmpty() }.take(10)
         val safeHelped = helpedPeersCount.coerceIn(0, 10000)
 
-        if (isLocalSession) {
+        val firestore = db
+        if (useLocalStore || firestore == null) {
             val now = Timestamp.now()
             localProfileFlow.value = StudentProfile(
                 id = uid,
@@ -193,7 +209,7 @@ class SynapseRepository(
             return@runCatching
         }
 
-        val docRef = db.collection("users").document(uid)
+        val docRef = firestore.collection("users").document(uid)
         try {
             val existingSnap = docRef.get().await()
             if (!existingSnap.exists()) {
@@ -247,7 +263,8 @@ class SynapseRepository(
         val cleanProgram = hostProgram.trim().ifBlank { "Ingeniería de Software" }.take(80)
         val cleanMaxSeats = maxSeats.coerceIn(2, 12)
 
-        if (isLocalSession) {
+        val firestore = db
+        if (useLocalStore || firestore == null) {
             val now = Timestamp.now()
             val newTable = StudyTable(
                 id = docId,
@@ -271,7 +288,7 @@ class SynapseRepository(
             return@runCatching docId
         }
 
-        val docRef = db.collection("study_tables").document(docId)
+        val docRef = firestore.collection("study_tables").document(docId)
         val payload = mapOf(
             "userId" to uid,
             "subject" to subject.trim().take(100),
@@ -319,7 +336,8 @@ class SynapseRepository(
         }
         val newOccupied = updatedParticipants.size.coerceIn(1, table.maxSeats.toInt())
 
-        if (isLocalSession) {
+        val firestore = db
+        if (useLocalStore || firestore == null) {
             localTablesFlow.value = localTablesFlow.value.map { existing ->
                 if (existing.id == table.id) {
                     existing.copy(
@@ -335,7 +353,7 @@ class SynapseRepository(
             return@runCatching joining
         }
 
-        val docRef = db.collection("study_tables").document(table.id)
+        val docRef = firestore.collection("study_tables").document(table.id)
         val updateMap = mapOf(
             "occupiedSeats" to newOccupied,
             "participantNames" to updatedParticipants,
@@ -355,11 +373,12 @@ class SynapseRepository(
 
     suspend fun deleteStudyTable(tableId: String): Result<Unit> = runCatching {
         requireUserId()
-        if (isLocalSession) {
+        val firestore = db
+        if (useLocalStore || firestore == null) {
             localTablesFlow.value = localTablesFlow.value.filterNot { it.id == tableId }
             return@runCatching
         }
-        val docRef = db.collection("study_tables").document(tableId)
+        val docRef = firestore.collection("study_tables").document(tableId)
         try {
             docRef.delete().await()
         } catch (e: CancellationException) {
@@ -385,7 +404,8 @@ class SynapseRepository(
         val cleanAuthor = authorName.trim().ifBlank { "Estudiante FESC" }.take(80)
         val cleanProgram = authorProgram.trim().ifBlank { "Ingeniería de Software" }.take(80)
 
-        if (isLocalSession) {
+        val firestore = db
+        if (useLocalStore || firestore == null) {
             val now = Timestamp.now()
             val newAlert = SosAlert(
                 id = docId,
@@ -409,7 +429,7 @@ class SynapseRepository(
             return@runCatching docId
         }
 
-        val docRef = db.collection("sos_alerts").document(docId)
+        val docRef = firestore.collection("sos_alerts").document(docId)
         val payload = mapOf(
             "userId" to uid,
             "subject" to subject.trim().take(100),
@@ -452,7 +472,8 @@ class SynapseRepository(
         val msgText = customMessage?.trim()?.takeIf { it.isNotEmpty() }
             ?: "¡Voy en camino a ${alert.spotReference} (${CampusZone.fromId(alert.campusZone).shortName}) para explicarte paso a paso!"
 
-        if (isLocalSession) {
+        val firestore = db
+        if (useLocalStore || firestore == null) {
             localSosFlow.value = localSosFlow.value.map { existing ->
                 if (existing.id == alert.id) {
                     existing.copy(
@@ -476,7 +497,7 @@ class SynapseRepository(
             return@runCatching
         }
 
-        val docRef = db.collection("sos_alerts").document(alert.id)
+        val docRef = firestore.collection("sos_alerts").document(alert.id)
         try {
             docRef.update(
                 mapOf(
@@ -506,7 +527,8 @@ class SynapseRepository(
     suspend fun toggleSosResolved(alert: SosAlert): Result<Boolean> = runCatching {
         requireUserId()
         val newResolved = !alert.isResolved
-        if (isLocalSession) {
+        val firestore = db
+        if (useLocalStore || firestore == null) {
             localSosFlow.value = localSosFlow.value.map { existing ->
                 if (existing.id == alert.id) {
                     existing.copy(isResolved = newResolved, updatedAt = Timestamp.now())
@@ -517,7 +539,7 @@ class SynapseRepository(
             return@runCatching newResolved
         }
 
-        val docRef = db.collection("sos_alerts").document(alert.id)
+        val docRef = firestore.collection("sos_alerts").document(alert.id)
         try {
             docRef.update(
                 mapOf(
@@ -549,7 +571,8 @@ class SynapseRepository(
         val cleanRole = senderRole.trim().ifBlank { "Par Académico" }.take(60)
         val cleanContent = content.trim().take(500)
 
-        if (isLocalSession) {
+        val firestore = db
+        if (useLocalStore || firestore == null) {
             val now = Timestamp.now()
             val newMessage = CollaborationMessage(
                 id = msgId,
@@ -567,7 +590,7 @@ class SynapseRepository(
             return@runCatching msgId
         }
 
-        val docRef = db.collection("collaboration_messages").document(msgId)
+        val docRef = firestore.collection("collaboration_messages").document(msgId)
         val payload = mapOf(
             "userId" to uid,
             "parentId" to parentId.trim().take(128),
@@ -754,7 +777,8 @@ class SynapseRepository(
             )
         )
 
-        if (isLocalSession) {
+        val firestore = db
+        if (useLocalStore || firestore == null) {
             val now = Timestamp.now()
             localTablesFlow.value = sampleTables.map { t ->
                 StudyTable(
@@ -814,7 +838,7 @@ class SynapseRepository(
         }
 
         for (t in sampleTables) {
-            val docRef = db.collection("study_tables").document("${uid}_${t.id}")
+            val docRef = firestore.collection("study_tables").document("${uid}_${t.id}")
             val payload = mapOf(
                 "userId" to uid,
                 "subject" to t.subject,
@@ -837,7 +861,7 @@ class SynapseRepository(
 
         for (s in sampleSos) {
             val docId = "${uid}_${s.id}"
-            val docRef = db.collection("sos_alerts").document(docId)
+            val docRef = firestore.collection("sos_alerts").document(docId)
             val payload = mapOf(
                 "userId" to uid,
                 "subject" to s.subject,
@@ -858,7 +882,7 @@ class SynapseRepository(
             docRef.set(payload).await()
         }
 
-        val initialMsgRef = db.collection("collaboration_messages").document("${uid}_msg_init_1")
+        val initialMsgRef = firestore.collection("collaboration_messages").document("${uid}_msg_init_1")
         initialMsgRef.set(
             mapOf(
                 "userId" to uid,
