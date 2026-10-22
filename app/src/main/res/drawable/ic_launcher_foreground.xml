@@ -4,31 +4,37 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Neural connection edges -->
+    <!-- Synapse connection lines in FESC Burgundy -->
     <path
-        android:strokeColor="#00E5FF"
-        android:strokeWidth="3.5"
-        android:strokeLineCap="round"
-        android:pathData="M34,64 L54,48 L74,64 M54,48 L54,74 M34,64 L54,74 L74,64" />
-    <!-- Academic Mortarboard Cap Top (Filled Silhouette) -->
+        android:pathData="M34,42 L54,30 L74,42 L74,66 L54,78 L34,66 Z"
+        android:strokeWidth="2.8"
+        android:strokeColor="#9C0F06"
+        android:fillColor="#1A9C0F06" />
     <path
-        android:fillColor="#00E5FF"
-        android:pathData="M54,26 L80,38 L54,50 L28,38 Z" />
-    <!-- Cap Base -->
+        android:pathData="M34,42 L54,54 M74,42 L54,54 M54,78 L54,54"
+        android:strokeWidth="2.4"
+        android:strokeColor="#E30513"
+        android:fillColor="#00000000" />
+    <!-- Central hub and outer nodes in FESC Red and White -->
     <path
-        android:fillColor="#8B5CF6"
-        android:pathData="M38,44 L38,54 C38,58 45,62 54,62 C63,62 70,58 70,54 L70,44 L54,51.5 Z" />
-    <!-- Glowing Synapse Nodes -->
+        android:pathData="M54,54m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0"
+        android:fillColor="#E30513" />
     <path
-        android:fillColor="#00E5FF"
-        android:pathData="M34,64m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0" />
+        android:pathData="M54,30m-4.5,0a4.5,4.5 0,1 1,9 0a4.5,4.5 0,1 1,-9 0"
+        android:fillColor="#FFFFFF" />
     <path
-        android:fillColor="#00E5FF"
-        android:pathData="M74,64m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0" />
+        android:pathData="M34,42m-4.5,0a4.5,4.5 0,1 1,9 0a4.5,4.5 0,1 1,-9 0"
+        android:fillColor="#E30513" />
     <path
-        android:fillColor="#FF3366"
-        android:pathData="M54,75m-6.5,0a6.5,6.5 0,1 1,13 0a6.5,6.5 0,1 1,-13 0" />
+        android:pathData="M74,42m-4.5,0a4.5,4.5 0,1 1,9 0a4.5,4.5 0,1 1,-9 0"
+        android:fillColor="#E30513" />
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,38m-3.5,0a3.5,3.5 0,1 1,7 0a3.5,3.5 0,1 1,-7 0" />
+        android:pathData="M34,66m-4.5,0a4.5,4.5 0,1 1,9 0a4.5,4.5 0,1 1,-9 0"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M74,66m-4.5,0a4.5,4.5 0,1 1,9 0a4.5,4.5 0,1 1,-9 0"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M54,78m-4.5,0a4.5,4.5 0,1 1,9 0a4.5,4.5 0,1 1,-9 0"
+        android:fillColor="#E30513" />
 </vector>

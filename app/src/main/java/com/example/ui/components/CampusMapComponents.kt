@@ -150,18 +150,18 @@ fun InteractiveCampusRadarCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             // Interactive Campus Canvas + Positioned Zone Nodes
+            val mapGradientColors = if (com.example.ui.theme.isSynapseDarkMode) {
+                listOf(Color(0xFF2B2E36), Color(0xFF1B1D22))
+            } else {
+                listOf(Color(0xFFFFFFFF), Color(0xFFEBEEF3))
+            }
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(270.dp)
                     .clip(RoundedCornerShape(20.dp))
                     .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                Color(0xFF16223B),
-                                SynapseObsidian
-                            )
-                        )
+                        Brush.radialGradient(colors = mapGradientColors)
                     )
                     .border(1.dp, SynapseBorder, RoundedCornerShape(20.dp))
             ) {
@@ -286,8 +286,12 @@ fun InteractiveCampusRadarCard(
                             .background(
                                 when {
                                     isSelected -> SynapseElevatedSurface
-                                    zoneSos > 0 -> Color(0xFF2B1222)
-                                    else -> SynapseObsidian.copy(alpha = 0.90f)
+                                    zoneSos > 0 -> if (com.example.ui.theme.isSynapseDarkMode) {
+                                        Color(0xFF3A1D1D)
+                                    } else {
+                                        Color(0xFFFFF5F5)
+                                    }
+                                    else -> SynapseCardSurface
                                 }
                             )
                             .border(
@@ -492,7 +496,7 @@ fun InteractiveCampusRadarCard(
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = SynapseCyan,
-                                contentColor = SynapseObsidian
+                                contentColor = Color.White
                             ),
                             modifier = Modifier.testTag("open_table_in_zone_button")
                         ) {

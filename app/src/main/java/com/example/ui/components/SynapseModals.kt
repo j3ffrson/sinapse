@@ -110,9 +110,9 @@ fun CreateStudyTableDialog(
                 .fillMaxWidth()
                 .padding(16.dp)
                 .testTag("create_table_dialog"),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = SynapseCardSurface),
-            border = BorderStroke(1.dp, SynapseCyan.copy(alpha = 0.5f))
+            border = BorderStroke(1.dp, SynapseBorder)
         ) {
             Column(
                 modifier = Modifier
@@ -270,7 +270,7 @@ fun CreateStudyTableDialog(
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = SynapseCyan,
-                            contentColor = SynapseObsidian
+                            contentColor = Color.White
                         ),
                         modifier = Modifier.testTag("confirm_create_table_button")
                     ) {
@@ -661,7 +661,7 @@ fun CollaborationThreadDialog(
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = SynapseCyan,
-                            contentColor = SynapseObsidian
+                            contentColor = Color.White
                         ),
                         modifier = Modifier
                             .height(54.dp)
@@ -899,7 +899,7 @@ fun StudentProfileDialog(
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = SynapseCyan,
-                        contentColor = SynapseObsidian
+                        contentColor = Color.White
                     )
                 ) {
                     Text("Guardar Perfil y Estado en Vivo", fontWeight = FontWeight.Bold)

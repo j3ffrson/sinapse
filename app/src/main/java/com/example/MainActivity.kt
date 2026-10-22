@@ -27,8 +27,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Hub
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -91,6 +93,7 @@ import com.example.ui.theme.SynapseElevatedSurface
 import com.example.ui.theme.SynapseObsidian
 import com.example.ui.theme.SynapseSurface
 import com.example.ui.theme.SynapseTextSecondary
+import com.example.ui.theme.isSynapseDarkMode
 import com.example.ui.viewmodel.SynapseViewModel
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -337,6 +340,18 @@ fun MainSynapseScaffold(
                     }
 
                     IconButton(
+                        onClick = { isSynapseDarkMode = !isSynapseDarkMode },
+                        modifier = Modifier.testTag("topbar_theme_toggle_button")
+                    ) {
+                        Icon(
+                            imageVector = if (isSynapseDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = if (isSynapseDarkMode) "Cambiar a modo claro" else "Cambiar a modo oscuro",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    IconButton(
                         onClick = { showProfileDialog = true },
                         modifier = Modifier.testTag("open_profile_button")
                     ) {
@@ -363,8 +378,8 @@ fun MainSynapseScaffold(
                     },
                     label = { Text(SynapseTab.RADAR.label) },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = SynapseObsidian,
-                        selectedTextColor = SynapseCyan,
+                        selectedIconColor = androidx.compose.ui.graphics.Color.White,
+                        selectedTextColor = MaterialTheme.colorScheme.onSurface,
                         indicatorColor = SynapseCyan,
                         unselectedIconColor = SynapseTextSecondary,
                         unselectedTextColor = SynapseTextSecondary
@@ -381,7 +396,7 @@ fun MainSynapseScaffold(
                                 if (activeTablesCount > 0) {
                                     Badge(
                                         containerColor = SynapseCyan,
-                                        contentColor = SynapseObsidian
+                                        contentColor = androidx.compose.ui.graphics.Color.White
                                     ) {
                                         Text("$activeTablesCount")
                                     }
@@ -393,8 +408,8 @@ fun MainSynapseScaffold(
                     },
                     label = { Text(SynapseTab.TABLES.label) },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = SynapseObsidian,
-                        selectedTextColor = SynapseCyan,
+                        selectedIconColor = androidx.compose.ui.graphics.Color.White,
+                        selectedTextColor = MaterialTheme.colorScheme.onSurface,
                         indicatorColor = SynapseCyan,
                         unselectedIconColor = SynapseTextSecondary,
                         unselectedTextColor = SynapseTextSecondary
@@ -409,7 +424,10 @@ fun MainSynapseScaffold(
                         BadgedBox(
                             badge = {
                                 if (urgentSosCount > 0) {
-                                    Badge(containerColor = SynapseCoralSos) {
+                                    Badge(
+                                        containerColor = SynapseCoralSos,
+                                        contentColor = androidx.compose.ui.graphics.Color.White
+                                    ) {
                                         Text("$urgentSosCount")
                                     }
                                 }
@@ -420,8 +438,8 @@ fun MainSynapseScaffold(
                     },
                     label = { Text(SynapseTab.SOS.label) },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.onTertiary,
-                        selectedTextColor = SynapseCoralSos,
+                        selectedIconColor = androidx.compose.ui.graphics.Color.White,
+                        selectedTextColor = MaterialTheme.colorScheme.onSurface,
                         indicatorColor = SynapseCoralSos,
                         unselectedIconColor = SynapseTextSecondary,
                         unselectedTextColor = SynapseTextSecondary

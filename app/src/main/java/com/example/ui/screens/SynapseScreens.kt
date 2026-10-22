@@ -312,10 +312,10 @@ fun StudyTablesScreen(
                         Spacer(modifier = Modifier.width(10.dp))
                         Button(
                             onClick = onOpenCreateTable,
-                            shape = RoundedCornerShape(14.dp),
+                            shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = SynapseCyan,
-                                contentColor = SynapseObsidian
+                                contentColor = Color.White
                             ),
                             modifier = Modifier.testTag("create_study_table_button")
                         ) {
@@ -419,9 +419,9 @@ fun SosRadarScreen(
     ) {
         item {
             Card(
-                shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = SynapseCoralContainer.copy(alpha = 0.45f)),
-                border = BorderStroke(1.dp, SynapseCoralSos.copy(alpha = 0.6f))
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = SynapseCardSurface),
+                border = BorderStroke(1.dp, SynapseBorder)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -865,7 +865,7 @@ fun StudyTableCard(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (table.isJoinedByCurrentUser) SynapseEmerald else SynapseCyan,
-                        contentColor = SynapseObsidian
+                        contentColor = Color.White
                     )
                 ) {
                     Icon(
@@ -902,13 +902,13 @@ fun SosAlertCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("sos_alert_card_${alert.id}"),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (alert.isResolved) SynapseCardSurface else Color(0xFF1F1629)
+            containerColor = SynapseCardSurface
         ),
         border = BorderStroke(
-            width = 1.5.dp,
-            color = if (alert.isResolved) SynapseEmerald.copy(alpha = 0.6f) else SynapseCoralSos
+            width = 1.dp,
+            color = if (alert.isResolved) SynapseBorder else SynapseCyan
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -1179,7 +1179,7 @@ private fun EmptyCampusStateCard(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = SynapseCyan,
-                        contentColor = SynapseObsidian
+                        contentColor = Color.White
                     )
                 ) {
                     Text(primaryActionLabel, fontWeight = FontWeight.Bold)

@@ -5,11 +5,12 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -22,16 +23,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Hub
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,7 +39,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,12 +51,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -65,14 +62,15 @@ import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
-import com.example.R
 import com.example.ui.theme.SynapseBorder
 import com.example.ui.theme.SynapseCardSurface
 import com.example.ui.theme.SynapseCoralSos
 import com.example.ui.theme.SynapseCyan
+import com.example.ui.theme.SynapseElevatedSurface
 import com.example.ui.theme.SynapseObsidian
+import com.example.ui.theme.SynapseTextMuted
 import com.example.ui.theme.SynapseTextSecondary
-import com.example.ui.theme.SynapseViolet
+import com.example.ui.theme.isSynapseDarkMode
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -200,6 +198,7 @@ fun signOut(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AuthScreen(
     onAuthSuccess: () -> Unit,
@@ -220,257 +219,228 @@ fun AuthScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(SynapseObsidian, MaterialTheme.colorScheme.surface)
-                )
-            )
-            .windowInsetsPadding(WindowInsets.safeDrawing),
-        contentAlignment = Alignment.Center
+            .background(SynapseObsidian)
+            .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
-        Column(
+        // Light / Dark Mode Toggle Pill in Top-Right
+        Surface(
+            onClick = { isSynapseDarkMode = !isSynapseDarkMode },
+            color = SynapseCardSurface,
+            shape = RoundedCornerShape(50),
+            border = BorderStroke(1.dp, SynapseBorder),
             modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 520.dp)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .align(Alignment.TopEnd)
+                .padding(horizontal = 20.dp, vertical = 14.dp)
+                .testTag("auth_theme_toggle_button")
         ) {
-            // Emblem Pill
-            Surface(
-                color = SynapseCardSurface,
-                shape = RoundedCornerShape(50),
-                border = BorderStroke(1.dp, SynapseBorder)
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                Icon(
+                    imageVector = if (isSynapseDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                    contentDescription = "Cambiar tema claro u oscuro",
+                    tint = SynapseCyan,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = if (isSynapseDarkMode) "Modo Claro" else "Modo Oscuro",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
+        // High-Contrast Minimalist Card Container
+        Card(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .widthIn(max = 420.dp)
+                .padding(horizontal = 24.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = SynapseCardSurface),
+            border = BorderStroke(1.dp, SynapseBorder),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Minimalist Institutional Emblem
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(SynapseCyan.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Hub,
                         contentDescription = null,
                         tint = SynapseCyan,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "RED SINÁPTICA DE CAMPUS • FESC",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = SynapseCyan
+                        modifier = Modifier.size(28.dp)
                     )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-            Text(
-                text = "FESC Synapse",
-                style = MaterialTheme.typography.displayLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center
-            )
+                Text(
+                    text = "FESC • COMUNIDAD DE ESTUDIO",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = SynapseCyan,
+                    fontWeight = FontWeight.Bold
+                )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
-            Text(
-                text = "No estudies solo antes de un parcial. Conéctate en tiempo real con compañeros en la biblioteca, cubículos y áreas comunes del campus.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = SynapseTextSecondary,
-                textAlign = TextAlign.Center
-            )
+                Text(
+                    text = "FESC Synapse",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
 
-            Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            // Hero Artwork Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = SynapseCardSurface),
-                border = BorderStroke(1.dp, SynapseBorder)
-            ) {
-                Column {
-                    Image(
-                        painter = painterResource(id = R.drawable.img_campus_synapse_hero),
-                        contentDescription = "Ilustración de la red de estudio FESC Synapse",
+                Text(
+                    text = "Conéctate en tiempo real con compañeros que estudian tus mismas materias en el campus.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = SynapseTextSecondary,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(22.dp))
+
+                // Lightweight Minimalist Feature Pills
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    MinimalFeaturePill(
+                        icon = Icons.Default.LocationOn,
+                        label = "Mapa del Campus"
+                    )
+                    MinimalFeaturePill(
+                        icon = Icons.Default.Groups,
+                        label = "Mesas en Vivo"
+                    )
+                    MinimalFeaturePill(
+                        icon = Icons.Default.Bolt,
+                        label = "Alertas SOS"
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                if (errorMessage != null) {
+                    Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(150.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                    Column(
-                        modifier = Modifier.padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                            .padding(bottom = 14.dp),
+                        color = SynapseElevatedSurface,
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, SynapseCoralSos.copy(alpha = 0.6f))
                     ) {
-                        FeatureHighlightRow(
-                            icon = Icons.Default.LocationOn,
-                            accentColor = SynapseCyan,
-                            title = "Mapa Interactivo de Zonas del Campus",
-                            subtitle = "Ubica al instante quién estudia tu misma materia en Biblioteca, Cubículos, Laboratorios o Cafetería."
-                        )
-                        FeatureHighlightRow(
-                            icon = Icons.Default.Groups,
-                            accentColor = SynapseViolet,
-                            title = "Mesas de Estudio Abiertas con Cupos en Vivo",
-                            subtitle = "Reserva tu asiento en mesas colaborativas o abre tu propio grupo de repaso."
-                        )
-                        FeatureHighlightRow(
-                            icon = Icons.Default.Bolt,
-                            accentColor = SynapseCoralSos,
-                            title = "Alertas SOS de Dudas Urgentes",
-                            subtitle = "Lanza una señal SOS antes de tu examen parcial y recibe ayuda presencial o paso a paso."
+                        Text(
+                            text = errorMessage!!,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(12.dp)
                         )
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (errorMessage != null) {
-                Surface(
+                Button(
+                    onClick = {
+                        errorMessage = null
+                        isLoading = true
+                        onGoogleSignInClicked(
+                            context = context,
+                            credentialManager = credentialManager,
+                            onAuthSuccess = {
+                                isLoading = false
+                                onAuthSuccess()
+                            },
+                            onAuthFallbackToLocalCampus = { displayName ->
+                                isLoading = false
+                                onEnterLocalCampus(displayName)
+                            },
+                            onAuthError = { msg ->
+                                isLoading = false
+                                errorMessage = msg
+                            },
+                            scope = coroutineScope
+                        )
+                    },
+                    enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 14.dp),
-                    color = SynapseCoralSos.copy(alpha = 0.14f),
-                    shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(1.dp, SynapseCoralSos.copy(alpha = 0.5f))
+                        .height(52.dp)
+                        .testTag("google_sign_in_button"),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SynapseCyan,
+                        contentColor = Color.White
+                    )
                 ) {
-                    Text(
-                        text = errorMessage!!,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(12.dp)
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(22.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Continuar con Google",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
-            }
 
-            Button(
-                onClick = {
-                    errorMessage = null
-                    isLoading = true
-                    onGoogleSignInClicked(
-                        context = context,
-                        credentialManager = credentialManager,
-                        onAuthSuccess = {
-                            isLoading = false
-                            onAuthSuccess()
-                        },
-                        onAuthFallbackToLocalCampus = { displayName ->
-                            isLoading = false
-                            onEnterLocalCampus(displayName)
-                        },
-                        onAuthError = { msg ->
-                            isLoading = false
-                            errorMessage = msg
-                        },
-                        scope = coroutineScope
-                    )
-                },
-                enabled = !isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .testTag("google_sign_in_button"),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = SynapseCyan,
-                    contentColor = SynapseObsidian
-                )
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = SynapseObsidian,
-                        strokeWidth = 2.5.dp
-                    )
-                } else {
-                    Text(
-                        text = "Sign in with Google • Entrar al Campus",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+                Spacer(modifier = Modifier.height(12.dp))
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            OutlinedButton(
-                onClick = {
-                    errorMessage = null
-                    onEnterLocalCampus("Estudiante FESC")
-                },
-                enabled = !isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .testTag("local_campus_sign_in_button"),
-                shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, SynapseCyan.copy(alpha = 0.55f)),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = SynapseCyan
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    tint = SynapseCyan,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Acceso Directo Estudiante FESC (Dispositivo Local)",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold
+                    text = "Usa tu cuenta institucional o personal de Google",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = SynapseTextMuted,
+                    textAlign = TextAlign.Center
                 )
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "Sincronización segura con tu cuenta Google o acceso instantáneo para pruebas en dispositivo físico.",
-                style = MaterialTheme.typography.bodySmall,
-                color = SynapseTextSecondary,
-                textAlign = TextAlign.Center
-            )
         }
     }
 }
 
 @Composable
-private fun FeatureHighlightRow(
+private fun MinimalFeaturePill(
     icon: ImageVector,
-    accentColor: androidx.compose.ui.graphics.Color,
-    title: String,
-    subtitle: String
+    label: String
 ) {
-    Row(
-        verticalAlignment = Alignment.Top,
-        modifier = Modifier.fillMaxWidth()
+    Surface(
+        color = SynapseElevatedSurface,
+        shape = RoundedCornerShape(50),
+        border = BorderStroke(1.dp, SynapseBorder)
     ) {
-        Box(
-            modifier = Modifier
-                .size(38.dp)
-                .clip(CircleShape)
-                .background(accentColor.copy(alpha = 0.16f)),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = accentColor,
-                modifier = Modifier.size(20.dp)
+                tint = SynapseCyan,
+                modifier = Modifier.size(14.dp)
             )
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column {
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = SynapseTextSecondary
             )
         }
     }
