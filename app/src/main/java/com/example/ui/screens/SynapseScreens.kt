@@ -837,12 +837,14 @@ fun StudyTableCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedButton(
                     onClick = onOpenThread,
                     modifier = Modifier
                         .weight(1f)
+                        .height(44.dp)
                         .testTag("table_chat_button_${table.id}"),
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, SynapseBorder)
@@ -853,7 +855,7 @@ fun StudyTableCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Chat de Mesa")
+                    Text("Chat de Mesa", maxLines = 1)
                 }
 
                 Button(
@@ -861,6 +863,7 @@ fun StudyTableCard(
                     enabled = !table.isFull || table.isJoinedByCurrentUser,
                     modifier = Modifier
                         .weight(1.2f)
+                        .height(44.dp)
                         .testTag("join_table_button_${table.id}"),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -880,7 +883,8 @@ fun StudyTableCard(
                             table.isFull -> "Mesa Llena"
                             else -> "Unirme (${table.availableSeats} libres)"
                         },
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
                     )
                 }
             }
@@ -1032,9 +1036,8 @@ fun SosAlertCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            FlowRow(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (!alert.isResolved) {
@@ -1045,7 +1048,10 @@ fun SosAlertCard(
                             containerColor = SynapseCoralSos,
                             contentColor = Color.White
                         ),
-                        modifier = Modifier.testTag("help_sos_button_${alert.id}")
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp)
+                            .testTag("help_sos_button_${alert.id}")
                     ) {
                         Icon(
                             imageVector = Icons.Default.DirectionsWalk,
@@ -1055,47 +1061,62 @@ fun SosAlertCard(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = if (alert.isCurrentUserHelping) "¡Ya vas en camino!" else "¡Voy a explicarte!",
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
                     }
                 }
 
-                OutlinedButton(
-                    onClick = onOpenThread,
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, SynapseCyan),
-                    modifier = Modifier.testTag("sos_thread_button_${alert.id}")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Chat,
-                        contentDescription = null,
-                        tint = SynapseCyan,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Explicar / Chat (${alert.responsesCount})",
-                        color = SynapseCyan
-                    )
-                }
+                    OutlinedButton(
+                        onClick = onOpenThread,
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, SynapseCyan),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(42.dp)
+                            .testTag("sos_thread_button_${alert.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Chat,
+                            contentDescription = null,
+                            tint = SynapseCyan,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Chat (${alert.responsesCount})",
+                            color = SynapseCyan,
+                            maxLines = 1
+                        )
+                    }
 
-                OutlinedButton(
-                    onClick = onToggleResolve,
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, SynapseEmerald),
-                    modifier = Modifier.testTag("resolve_sos_button_${alert.id}")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        tint = SynapseEmerald,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = if (alert.isResolved) "Reabrir" else "Marcar Resuelta",
-                        color = SynapseEmerald
-                    )
+                    OutlinedButton(
+                        onClick = onToggleResolve,
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, SynapseEmerald),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(42.dp)
+                            .testTag("resolve_sos_button_${alert.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = SynapseEmerald,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (alert.isResolved) "Reabrir" else "Resuelta",
+                            color = SynapseEmerald,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }

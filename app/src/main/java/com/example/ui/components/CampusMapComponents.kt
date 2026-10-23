@@ -286,11 +286,7 @@ fun InteractiveCampusRadarCard(
                             .background(
                                 when {
                                     isSelected -> SynapseElevatedSurface
-                                    zoneSos > 0 -> if (com.example.ui.theme.isSynapseDarkMode) {
-                                        Color(0xFF3A1D1D)
-                                    } else {
-                                        Color(0xFFFFF5F5)
-                                    }
+                                    zoneSos > 0 -> com.example.ui.theme.SynapseCoralContainer
                                     else -> SynapseCardSurface
                                 }
                             )
@@ -420,77 +416,96 @@ fun InteractiveCampusRadarCard(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.LocationOn,
-                                    contentDescription = null,
-                                    tint = SynapseCyan,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = activeZone.title,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                tint = SynapseCyan,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "${activeZone.buildingRef} • ${activeZone.description}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = SynapseTextSecondary
+                                text = activeZone.title,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        if (currentUserZone != activeZone) {
-                            OutlinedButton(
-                                onClick = { onCheckInZone(activeZone) },
-                                shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(1.dp, SynapseEmerald),
-                                modifier = Modifier.testTag("checkin_zone_button")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                    tint = SynapseEmerald,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Check-in Aquí", color = SynapseEmerald)
-                            }
-                        } else {
+                        if (currentUserZone == activeZone) {
+                            Spacer(modifier = Modifier.width(8.dp))
                             Surface(
                                 color = SynapseEmerald.copy(alpha = 0.16f),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = RoundedCornerShape(50),
                                 border = BorderStroke(1.dp, SynapseEmerald.copy(alpha = 0.5f))
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.CheckCircle,
                                         contentDescription = null,
                                         tint = SynapseEmerald,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(14.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
                                     Text(
                                         text = "Estás en esta zona",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = SynapseEmerald
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = SynapseEmerald,
+                                        fontWeight = FontWeight.SemiBold
                                     )
                                 }
                             }
                         }
+                    }
 
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "${activeZone.buildingRef} • ${activeZone.description}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SynapseTextSecondary
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    if (currentUserZone != activeZone) {
+                        OutlinedButton(
+                            onClick = { onCheckInZone(activeZone) },
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, SynapseEmerald),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(42.dp)
+                                .testTag("checkin_zone_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = SynapseEmerald,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Check-in Aquí (${activeZone.shortName})",
+                                color = SynapseEmerald,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Button(
                             onClick = { onOpenTableInZone(activeZone) },
                             shape = RoundedCornerShape(12.dp),
@@ -498,15 +513,22 @@ fun InteractiveCampusRadarCard(
                                 containerColor = SynapseCyan,
                                 contentColor = Color.White
                             ),
-                            modifier = Modifier.testTag("open_table_in_zone_button")
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(44.dp)
+                                .testTag("open_table_in_zone_button")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Abrir Mesa")
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Abrir Mesa",
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1
+                            )
                         }
 
                         Button(
@@ -516,15 +538,22 @@ fun InteractiveCampusRadarCard(
                                 containerColor = SynapseCoralSos,
                                 contentColor = Color.White
                             ),
-                            modifier = Modifier.testTag("launch_sos_in_zone_button")
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(44.dp)
+                                .testTag("launch_sos_in_zone_button")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Bolt,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Lanzar SOS")
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Lanzar SOS",
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1
+                            )
                         }
                     }
                 }

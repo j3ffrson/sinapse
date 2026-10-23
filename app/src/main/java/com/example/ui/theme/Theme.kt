@@ -30,19 +30,19 @@ private fun buildDarkColorScheme() = darkColorScheme(
     onError = Color.White
 )
 
-private fun buildLightColorScheme() = lightColorScheme(
+private fun buildLightColorScheme(colorblind: Boolean) = lightColorScheme(
     primary = SynapseCyan,
     onPrimary = Color.White,
     primaryContainer = SynapseCyanContainer,
-    onPrimaryContainer = Color(0xFF630B00),
+    onPrimaryContainer = if (colorblind) Color(0xFF003B5C) else Color(0xFF630B00),
     secondary = SynapseViolet,
     onSecondary = Color.White,
     secondaryContainer = SynapseVioletContainer,
-    onSecondaryContainer = Color(0xFF630B00),
+    onSecondaryContainer = if (colorblind) Color(0xFF1F1454) else Color(0xFF630B00),
     tertiary = SynapseCoralSos,
     onTertiary = Color.White,
     tertiaryContainer = SynapseCoralContainer,
-    onTertiaryContainer = Color(0xFF630B00),
+    onTertiaryContainer = if (colorblind) Color(0xFF6E2F00) else Color(0xFF630B00),
     background = SynapseObsidian,
     onBackground = SynapseTextPrimary,
     surface = SynapseSurface,
@@ -57,10 +57,12 @@ private fun buildLightColorScheme() = lightColorScheme(
 @Composable
 fun FESCSynapseTheme(
     darkTheme: Boolean = isSynapseDarkMode,
+    colorblindMode: Boolean = isSynapseColorblindMode,
     content: @Composable () -> Unit
 ) {
     isSynapseDarkMode = darkTheme
-    val colorScheme = if (darkTheme) buildDarkColorScheme() else buildLightColorScheme()
+    isSynapseColorblindMode = colorblindMode
+    val colorScheme = if (darkTheme) buildDarkColorScheme() else buildLightColorScheme(colorblindMode)
 
     MaterialTheme(
         colorScheme = colorScheme,

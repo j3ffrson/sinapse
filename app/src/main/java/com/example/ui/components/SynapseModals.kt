@@ -2,7 +2,9 @@ package com.example.ui.components
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -13,21 +15,28 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -42,6 +51,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,6 +62,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -73,6 +85,8 @@ import com.example.ui.theme.SynapseObsidian
 import com.example.ui.theme.SynapseTextSecondary
 import com.example.ui.theme.SynapseViolet
 import com.example.ui.theme.SynapseVioletLight
+import com.example.ui.theme.isSynapseColorblindMode
+import com.example.ui.theme.isSynapseDarkMode
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -108,16 +122,17 @@ fun CreateStudyTableDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .systemBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 24.dp)
                 .testTag("create_table_dialog"),
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(22.dp),
             colors = CardDefaults.cardColors(containerColor = SynapseCardSurface),
             border = BorderStroke(1.dp, SynapseBorder)
         ) {
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp)
+                    .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 24.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -244,14 +259,21 @@ fun CreateStudyTableDialog(
                     )
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(onClick = onDismiss) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .weight(0.9f)
+                            .height(46.dp)
+                    ) {
                         Text("Cancelar")
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
                     Button(
                         onClick = {
                             if (subject.isBlank() || topic.isBlank() || spotReference.isBlank()) {
@@ -268,13 +290,17 @@ fun CreateStudyTableDialog(
                                 onDismiss()
                             }
                         },
+                        shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = SynapseCyan,
                             contentColor = Color.White
                         ),
-                        modifier = Modifier.testTag("confirm_create_table_button")
+                        modifier = Modifier
+                            .weight(1.3f)
+                            .height(46.dp)
+                            .testTag("confirm_create_table_button")
                     ) {
-                        Text("Publicar Mesa en Vivo", fontWeight = FontWeight.Bold)
+                        Text("Publicar Mesa", fontWeight = FontWeight.Bold, maxLines = 1)
                     }
                 }
             }
@@ -315,7 +341,8 @@ fun LaunchSosAlertDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .systemBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 24.dp)
                 .testTag("launch_sos_dialog"),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = SynapseCardSurface),
@@ -324,7 +351,7 @@ fun LaunchSosAlertDialog(
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp)
+                    .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 24.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -445,12 +472,18 @@ fun LaunchSosAlertDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(onClick = onDismiss) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .weight(0.9f)
+                            .height(46.dp)
+                    ) {
                         Text("Cancelar")
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
                     Button(
                         onClick = {
                             if (questionTitle.isBlank() || questionDetail.isBlank() || spotReference.isBlank()) {
@@ -467,15 +500,19 @@ fun LaunchSosAlertDialog(
                                 onDismiss()
                             }
                         },
+                        shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = SynapseCoralSos,
                             contentColor = Color.White
                         ),
-                        modifier = Modifier.testTag("confirm_launch_sos_button")
+                        modifier = Modifier
+                            .weight(1.3f)
+                            .height(46.dp)
+                            .testTag("confirm_launch_sos_button")
                     ) {
                         Icon(Icons.Default.Bolt, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Emitir Señal SOS", fontWeight = FontWeight.Bold)
+                        Text("Emitir Señal SOS", fontWeight = FontWeight.Bold, maxLines = 1)
                     }
                 }
             }
@@ -504,13 +541,14 @@ fun CollaborationThreadDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .systemBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 24.dp)
                 .testTag("collaboration_thread_dialog"),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = SynapseCardSurface),
             border = BorderStroke(1.dp, if (parentType == "SOS") SynapseCoralSos else SynapseCyan)
         ) {
-            Column(modifier = Modifier.padding(18.dp)) {
+            Column(modifier = Modifier.padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 22.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -716,7 +754,8 @@ fun StudentProfileDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .systemBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 28.dp)
                 .testTag("student_profile_dialog"),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = SynapseCardSurface),
@@ -725,7 +764,7 @@ fun StudentProfileDialog(
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp)
+                    .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 28.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -747,6 +786,147 @@ fun StudentProfileDialog(
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
+
+                // Accesibilidad Visual y Esquema para Daltónicos
+                Surface(
+                    color = SynapseElevatedSurface,
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(
+                        1.dp,
+                        if (isSynapseColorblindMode) SynapseCyan else SynapseBorder
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("profile_accessibility_section")
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Visibility,
+                                    contentDescription = null,
+                                    tint = SynapseCyan,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = "Accesibilidad: Modo Daltónicos",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = if (isSynapseColorblindMode) {
+                                            "Activo • Paleta Okabe-Ito (Azul Cobalto / Turquesa / Naranja)"
+                                        } else {
+                                            "Inactivo • Identidad Institucional FESC (Rojo / Verde)"
+                                        },
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = SynapseTextSecondary
+                                    )
+                                }
+                            }
+                            Switch(
+                                checked = isSynapseColorblindMode,
+                                onCheckedChange = { isSynapseColorblindMode = it },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = SynapseCyan
+                                ),
+                                modifier = Modifier.testTag("colorblind_mode_switch")
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Semantic color legend pills so the user immediately sees the safe contrast
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            AccessibilityLegendBadge(
+                                label = if (isSynapseColorblindMode) "Principal: Azul Cobalto" else "Principal: Rojo FESC",
+                                color = SynapseCyan
+                            )
+                            AccessibilityLegendBadge(
+                                label = if (isSynapseColorblindMode) "Cupos/OK: Azul Turquesa" else "Cupos/OK: Verde",
+                                color = SynapseEmerald
+                            )
+                            AccessibilityLegendBadge(
+                                label = if (isSynapseColorblindMode) "SOS: Naranja Vermellón" else "SOS: Rojo Alerta",
+                                color = SynapseCoralSos
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+                                onClick = { isSynapseColorblindMode = !isSynapseColorblindMode },
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isSynapseColorblindMode) SynapseEmerald else SynapseCyan,
+                                    contentColor = Color.White
+                                ),
+                                modifier = Modifier
+                                    .weight(1.15f)
+                                    .height(42.dp)
+                                    .testTag("colorblind_mode_toggle_button")
+                            ) {
+                                Icon(
+                                    imageVector = if (isSynapseColorblindMode) Icons.Default.CheckCircle else Icons.Default.Palette,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = if (isSynapseColorblindMode) "Daltónico Activo" else "Modo Daltónico",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1
+                                )
+                            }
+
+                            OutlinedButton(
+                                onClick = { isSynapseDarkMode = !isSynapseDarkMode },
+                                shape = RoundedCornerShape(10.dp),
+                                border = BorderStroke(1.dp, SynapseBorder),
+                                modifier = Modifier
+                                    .weight(0.85f)
+                                    .height(42.dp)
+                                    .testTag("profile_theme_toggle_button")
+                            ) {
+                                Icon(
+                                    imageVector = if (isSynapseDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = if (isSynapseDarkMode) "Claro" else "Oscuro",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = displayName,
@@ -844,29 +1024,37 @@ fun StudentProfileDialog(
                     }
                 }
 
-                HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = SynapseBorder)
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = SynapseBorder)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(
                         onClick = {
                             onReseedCampusDemo()
                             onDismiss()
                         },
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, SynapseBorder),
+                        modifier = Modifier
+                            .weight(1.15f)
+                            .height(46.dp)
                     ) {
                         Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Recargar Campus Demo")
+                        Text("Recargar Demo", maxLines = 1)
                     }
 
                     OutlinedButton(
                         onClick = onSignOut,
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, SynapseCoralSos),
-                        modifier = Modifier.testTag("sign_out_button")
+                        modifier = Modifier
+                            .weight(0.85f)
+                            .height(46.dp)
+                            .testTag("sign_out_button")
                     ) {
                         Icon(
                             imageVector = Icons.Default.Logout,
@@ -875,7 +1063,7 @@ fun StudentProfileDialog(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Salir", color = SynapseCoralSos)
+                        Text("Salir", color = SynapseCoralSos, maxLines = 1)
                     }
                 }
 
@@ -895,6 +1083,7 @@ fun StudentProfileDialog(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
+                        .height(50.dp)
                         .testTag("save_profile_button"),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -904,7 +1093,41 @@ fun StudentProfileDialog(
                 ) {
                     Text("Guardar Perfil y Estado en Vivo", fontWeight = FontWeight.Bold)
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
 }
+
+@Composable
+private fun AccessibilityLegendBadge(
+    label: String,
+    color: Color
+) {
+    Surface(
+        color = color.copy(alpha = 0.14f),
+        shape = RoundedCornerShape(50),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.45f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(color)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = color,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+

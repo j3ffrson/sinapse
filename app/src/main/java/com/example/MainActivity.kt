@@ -295,16 +295,18 @@ fun MainSynapseScaffold(
                             )
                         }
                         Spacer(modifier = Modifier.width(10.dp))
-                        Column {
+                        Column(modifier = Modifier.padding(end = 6.dp)) {
                             Text(
                                 text = "FESC Synapse",
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1
                             )
                             Text(
-                                text = "Campus en Tiempo Real • ${userDefaultZone.shortName}",
+                                text = "Campus • ${userDefaultZone.shortName}",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = SynapseCyan
+                                color = SynapseCyan,
+                                maxLines = 1
                             )
                         }
                     }
